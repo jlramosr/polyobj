@@ -1,0 +1,164 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../iron-form/iron-form.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-button/paper-button.html">
+
+
+<!--
+`poly-obj`
+Objects creator
+
+@demo demo/index.html
+-->
+
+<dom-module id='poly-obj'>
+  <template>
+    <style is='custom-style' include="iron-flex iron-flex-alignment">
+      :host {
+        display: block;
+      }
+      paper-button.custom {
+        --paper-button-ink-color: var(--paper-pink-a200);
+        /* These could also be individually defined for each of the
+        specific css classes, but we'll just do it once as an example */
+        --paper-button-flat-keyboard-focus: {
+          background-color: var(--paper-pink-a200);
+          color: white !important;
+        };
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-pink-a200) !important;
+          color: white !important;
+        };
+      }
+      paper-button.blue {
+        background-color: var(--paper-indigo-500);
+        color: white;
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-pink-a200) !important;
+          color: white !important;
+        };
+      }
+      paper-button.green {
+        background-color: var(--paper-green-500);
+        color: white;
+      }
+      form {
+        margin-bottom: 30px;
+      }
+      #form-container {
+        margin-bottom: 20px;
+      }
+      #list-item {
+        margin: 10px 0px;
+        padding: 20px;
+        border: 1px solid var(--paper-green-500);
+      }
+      .flex-center-justified {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-justified);
+      }
+      .flex-vertical {
+        @apply(--layout-vertical);
+      }
+      .flexchild-vertical {
+        @apply(--layout-flex);
+      }
+    </style>
+
+    <form is='iron-form' method='get' action='/' class='flex-vertical'>
+      <div class='flexchild-vertical' id='form-container'>
+        <paper-input
+          label='Object Name'
+          name='objectName'
+          char-counter
+          maxlength='20'
+          required>
+        </paper-input>
+      </div>
+      <div class='flex-center-justified' id='form-buttons'>
+        <paper-button
+          toggles
+          raised
+          on-tap='_create'
+          class='custom green'>Create
+        </paper-button>
+        <paper-button
+          toggles
+          raised
+          on-tap='_clear'
+          class='custom blue'>Clear
+        </paper-button>
+      </div>
+    </form>
+    <iron-ajax
+      auto
+      url='objects.json'
+      params=''
+      handle-as='json'
+      on-response='objectsResponse'
+      debounce-duration='300'
+      last-response='{{objects}}'
+      id='ajaxGet'>
+    </iron-ajax>
+    <div id='list-container'>
+      <template is="dom-repeat" items="[[objects]]">
+        <div id='list-item'>
+          <span>
+            {{item.name}}
+          </span>
+        </div>
+      </template>
+    </div>
+  </template>
+
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'poly-obj',
+
+      listeners: {
+        'iron-form-submit': 'formSubmited'
+      },
+
+      properties: {
+        objects: {
+          type: Array,
+          value: () => {
+            return [];
+          }
+        }
+      },
+
+      _create() {
+        let form = this.$$('form');
+        //let objectName = form.name.value;
+        form.submit();
+        form.reset();
+        //this.$.ajaxGet.generateRequest();
+      },
+
+      _clear() {
+        let form = this.$$('form');
+        form.reset();
+        //form.querySelector('.output').innerHTML = '';
+      },
+
+      objectsResponse(request) {
+        let response = request.detail.response;
+        //this.objects = response;
+      },
+
+      formSubmited(event) {
+        let newObject = {};
+        newObject.name = event.detail.objectName;
+        this.push('objects', newObject);
+      }
+
+    });
+  }());
+  </script>
+</dom-module>
