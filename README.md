@@ -1,6 +1,6 @@
-# \<poly-obj\>
+# Polymer Objects Creator
 
-Objects creator
+Objects creator with custom fields using Polymer
 
 ## Install the Polymer-CLI
 
@@ -36,4 +36,4 @@ $ polymer test
 ```
 
 Your application is already set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.
-"# polyobj" 
+"# polyobj"
