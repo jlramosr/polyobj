@@ -32,32 +32,48 @@ Objects creator
           color: white !important;
         };
       }
-      paper-button.blue {
-        background-color: var(--paper-indigo-500);
+      paper-button.amber {
+        background-color: var(--paper-amber-800);
         color: white;
-        --paper-button-raised-keyboard-focus: {
-          background-color: var(--paper-pink-a200) !important;
-          color: white !important;
-        };
       }
       paper-button.green {
         background-color: var(--paper-green-500);
         color: white;
       }
       form {
-        margin-bottom: 30px;
+        margin-bottom: 28px;
       }
       #form-container {
-        margin-bottom: 20px;
+        margin-bottom: 18px;
+      }
+      #list-container {
+        margin-top: 52px;
       }
       #list-item {
-        margin: 10px 0px;
-        padding: 20px;
-        border: 1px solid var(--paper-green-500);
+        margin: 8px 0px;
+        padding: 10px;
+        background: var(--paper-indigo-600);
+        color: #FFF;
+        border-radius: 50px;
+      }
+      #item-name {
+        padding: 8px;
+        width: 80%;
+      }
+      #item-options {
+        float: right;
+        padding:6px;
       }
       .flex-center-justified {
         @apply(--layout-horizontal);
         @apply(--layout-center-justified);
+      }
+      .flex-end-justified {
+        @apply(--layout-horizontal);
+        @apply(--layout-end-justified);
+      }
+      .flex-horizontal {
+        @apply(--layout-horizontal);
       }
       .flex-vertical {
         @apply(--layout-vertical);
@@ -70,12 +86,33 @@ Objects creator
     <form is='iron-form' method='get' action='/' class='flex-vertical'>
       <div class='flexchild-vertical' id='form-container'>
         <paper-input
-          label='Object Name'
+          label='Collection Name'
           name='objectName'
           char-counter
           maxlength='20'
           required>
         </paper-input>
+        <paper-input
+          label='Main Field'
+          name='mainFieldName'
+          char-counter
+          maxlength='16'
+          required>
+        </paper-input>
+        <paper-button
+          toggles
+          raised
+          on-tap='_addField'
+          class='custom green'>Add Field
+        </paper-button>
+        <template is="dom-repeat" items="[[extraFields]]">
+          <paper-input
+            label='Field {{index}}'
+            name='objectName{{index}}'
+            char-counter
+            maxlength='16'>
+          </paper-input>
+        </template>
       </div>
       <div class='flex-center-justified' id='form-buttons'>
         <paper-button
@@ -88,7 +125,7 @@ Objects creator
           toggles
           raised
           on-tap='_clear'
-          class='custom blue'>Clear
+          class='custom amber'>Clear
         </paper-button>
       </div>
     </form>
@@ -105,9 +142,12 @@ Objects creator
     <div id='list-container'>
       <template is="dom-repeat" items="[[objects]]">
         <div id='list-item'>
-          <span>
+          <div id='item-options'>
+            <iron-icon icon="icons:more-vert"></iron-icon>
+          </div>
+          <div id='item-name'>
             {{item.name}}
-          </span>
+          </div>
         </div>
       </template>
     </div>
@@ -130,6 +170,12 @@ Objects creator
           value: () => {
             return [];
           }
+        },
+        extraFields: {
+          type: Array,
+          value: () => {
+            return [];
+          }
         }
       },
 
@@ -137,7 +183,6 @@ Objects creator
         let form = this.$$('form');
         //let objectName = form.name.value;
         form.submit();
-        form.reset();
         //this.$.ajaxGet.generateRequest();
       },
 
@@ -145,6 +190,11 @@ Objects creator
         let form = this.$$('form');
         form.reset();
         //form.querySelector('.output').innerHTML = '';
+      },
+
+      _addField() {
+        let newField = {};
+        this.push('extraFields', newField);
       },
 
       objectsResponse(request) {
@@ -155,7 +205,16 @@ Objects creator
       formSubmited(event) {
         let newObject = {};
         newObject.name = event.detail.objectName;
+        newObject.extraFields = [{
+          'name': event.detail.mainFieldName,
+          'type': 'String'
+        }];
+        /*this.extraFields.forEach((value) => {
+          newObject.push('extraFields', value)
+        });*/
         this.push('objects', newObject);
+        this.extraFields = [];
+        this.$$('form').reset();
       }
 
     });
