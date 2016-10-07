@@ -2,8 +2,11 @@
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../iron-form/iron-form.html">
 <link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../iron-input/iron-input.html">
 <link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-item/paper-item.html">
 <link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-fab/paper-fab.html">
 
 
 <!--
@@ -40,11 +43,36 @@ Objects creator
         background-color: var(--paper-green-500);
         color: white;
       }
+      paper-fab.fields {
+        width: 24px;
+        height: 24px;
+        padding: 2px;
+      }
+      paper-fab.add {
+        --paper-fab-background: var(--google-blue-500);
+        --paper-fab-keyboard-focus-background: var(--google-blue-500);
+        margin: 28px 5px 0px auto;
+      }
+      paper-fab.remove {
+        --paper-fab-background: var(--google-red-500);
+        --paper-fab-keyboard-focus-background: var(--google-red-500);
+        margin: auto 5px 16px 5px;
+      }
       form {
         margin-bottom: 28px;
       }
+      #form-object-name {
+        padding-bottom: 16px;
+        margin-bottom: 12px;
+      }
       #form-container {
         margin-bottom: 18px;
+      }
+      #form-main-field {
+        margin-bottom: 5px;
+      }
+      #form-buttons {
+        margin-top: 28px;
       }
       #list-container {
         margin-top: 52px;
@@ -56,13 +84,28 @@ Objects creator
         color: #FFF;
         border-radius: 50px;
       }
-      #item-name {
+      #list-item-name {
         padding: 8px;
-        width: 80%;
+        margin-right: auto;
+        margin-left: 10px;
       }
-      #item-options {
-        float: right;
+      #list-item-options {
         padding:6px;
+        margin-right: 4px;
+      }
+      .highlited {
+        padding: 0px 8px;
+        border-radius: 8px;
+        background: #FBFBFB;
+      }
+      .shoft {
+        background: #FCFCFC;
+      }
+      .medium {
+        background: #F6F6F6;
+      }
+      .brother-input {
+        margin-right: 12px;
       }
       .flex-center-justified {
         @apply(--layout-horizontal);
@@ -78,41 +121,66 @@ Objects creator
       .flex-vertical {
         @apply(--layout-vertical);
       }
-      .flexchild-vertical {
+      .flexchild {
         @apply(--layout-flex);
       }
     </style>
 
     <form is='iron-form' method='get' action='/' class='flex-vertical'>
-      <div class='flexchild-vertical' id='form-container'>
+      <div class='flexchild' id='form-container'>
         <paper-input
           label='Collection Name'
           name='objectName'
           char-counter
           maxlength='20'
-          required>
+          required
+          class='highlited medium'
+          id='form-object-name'>
         </paper-input>
-        <paper-input
-          label='Main Field'
-          name='mainFieldName'
-          char-counter
-          maxlength='16'
-          required>
-        </paper-input>
-        <paper-button
-          toggles
-          raised
-          on-tap='_addField'
-          class='custom green'>Add Field
-        </paper-button>
-        <template is="dom-repeat" items="[[extraFields]]">
+        <div id="form-main-field" class='flex-horizontal highlited shoft'>
           <paper-input
-            label='Field {{index}}'
-            name='objectName{{index}}'
+            label='Main Field'
+            name='mainFieldName'
             char-counter
-            maxlength='16'>
+            maxlength='16'
+            required
+            class='brother-input'>
           </paper-input>
-        </template>
+          <paper-input
+            label='Field Type'
+            name='mainFieldType'
+            required>
+          </paper-input>
+        </div>
+        <div id="form-rest-fields">
+          <template is="dom-repeat" items="[[extraFields]]">
+            <div class='flex-horizontal' id='form-rest-field'>
+              <div class='flexchild highlited shoft flex-horizontal'>
+                <paper-input
+                  label='Field {{index}}'
+                  name='objectName{{index}}'
+                  char-counter
+                  maxlength='16'
+                  required
+                  class='brother-input'>
+                </paper-input>
+                <paper-input
+                  label='Type'
+                  name='mainFieldType{{index}}'
+                  required>
+                </paper-input>
+              </div>
+            <paper-fab
+              mini
+              icon='remove'
+              class='fields remove'
+              on-tap='_removeField'
+              index='{{index}}'>
+            </paper-fab>
+            </div>
+          </template>
+        </div>
+        <paper-fab mini icon='add' class='fields add' on-tap='_addField'></paper-fab>
       </div>
       <div class='flex-center-justified' id='form-buttons'>
         <paper-button
@@ -139,16 +207,16 @@ Objects creator
       last-response='{{objects}}'
       id='ajaxGet'>
     </iron-ajax>
-    <div id='list-container'>
+    <div id='list-container' role='listbox'>
       <template is="dom-repeat" items="[[objects]]">
-        <div id='list-item'>
-          <div id='item-options'>
-            <iron-icon icon="icons:more-vert"></iron-icon>
-          </div>
-          <div id='item-name'>
+        <paper-item id='list-item'>
+          <div id='list-item-name'>
             {{item.name}}
           </div>
-        </div>
+          <div id='list-item-options'>
+            <iron-icon icon="icons:more-vert"></iron-icon>
+          </div>
+        </paper-item>
       </template>
     </div>
   </template>
@@ -195,6 +263,12 @@ Objects creator
       _addField() {
         let newField = {};
         this.push('extraFields', newField);
+      },
+
+      _removeField(event) {
+        let currentRemoveIndex = event.currentTarget.index;
+        console.log(this.extraFields[currentRemoveIndex]);
+        this.pop('extraFields', this.extraFields[currentRemoveIndex]);
       },
 
       objectsResponse(request) {
